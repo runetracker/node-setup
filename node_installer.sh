@@ -74,7 +74,7 @@ EOF
     chown $blockchain:$blockchain /data/$blockchain/$conf_file
 
     # Create service for the blockchain node with dedicated user/group
-    cat << EOF > /etc/systemd/system/${daemon}d.service
+    cat << EOF > /etc/systemd/system/${daemon}.service
 [Unit]
 Description=${blockchain} daemon
 After=network.target
@@ -93,7 +93,7 @@ EOF
     systemctl enable ${daemon}d
     systemctl start ${daemon}d
 
-    echo "$blockchain node setup completed. Check status with 'systemctl status ${daemon}d'"
+    echo "$blockchain node setup completed. Check status with 'systemctl status ${daemon}'"
 }
 
 # Example for Bitcoin with updated source URL
