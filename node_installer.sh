@@ -76,22 +76,33 @@ EOF
     # Create service for the blockchain node with dedicated user/group
     cat << EOF > /etc/systemd/system/${daemon}.service
 [Unit]
-Description=${blockchain} daemon
+Description=${blockchain}'s distributed currency daemon
 After=network.target
 
 [Service]
 User=$blockchain
 Group=$blockchain
-ExecStart=/usr/bin/${daemon}d -daemon -conf=/data/$blockchain/$conf_file -datadir=/data/$blockchain
+Type=forking
+PIDFile=/data/$blockchain/${daemon}.pid
+ExecStart=/usr/bin/${daemon} -daemon -pid=/data/$blockchain/${daemon}.pid \\
+-conf=/data/$blockchain/$conf_file -datadir=/data/$blockchain
 Restart=always
+PrivateTmp=true
+TimeoutStopSec=60s
+TimeoutStartSec=10s
+StartLimitInterval=120s
+StartLimitBurst=5
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
+    # Reload systemd daemon
+    systemctl daemon-reload
+
     # Enable and start the service
-    systemctl enable ${daemon}d
-    systemctl start ${daemon}d
+    systemctl enable ${daemon}
+    systemctl start ${daemon}
 
     echo "$blockchain node setup completed. Check status with 'systemctl status ${daemon}'"
 }
