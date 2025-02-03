@@ -27,10 +27,12 @@ check_disk_space() {
 # Function to setup a blockchain node with dedicated user/group
 setup_node() {
     local blockchain=$1
-    local daemon=$2
-    local conf=$3
-    local ppa=$4
-    local min_space=$5
+    local url=$2
+    local tarball=$3
+    local configure_options=$4
+    local daemon=$5
+    local conf_file=$6
+    local min_space=$7
 
     # Check disk space for this blockchain
     check_disk_space $min_space
@@ -44,26 +46,32 @@ setup_node() {
 
     # Update system and install dependencies
     apt update && apt upgrade -y
-    apt install -y build-essential libtool autotools-dev autoconf pkg-config libssl-dev libboost-all-dev libevent-dev libminiupnpc-dev
+    apt install -y build-essential cmake pkgconf python3 libevent-dev libboost-dev
 
-    # Add PPA if provided
-    if [ -n "$ppa" ]; then
-        add-apt-repository $ppa -y
-        apt update
+    # Fetch source code
+    cd /tmp
+    wget $url
+    tar -xzvf $tarball
+    cd $(basename $tarball .tar.gz)
+
+    # Configure and build the software
+    if [ -f autogen.sh ]; then
+        ./autogen.sh
     fi
+    ./configure $configure_options
+    make -j$(nproc)
+    make check
+    make install
 
-    # Install the daemon
-    apt install $daemon -y
-
-    # Create configuration file with txindex=1
-    cat << EOF > /data/$blockchain/$conf
+    # Create configuration file
+    cat << EOF > /data/$blockchain/$conf_file
 datadir=/data/$blockchain
 rpcuser=${blockchain}rpc
 rpcpassword=$(openssl rand -base64 32)
 server=1
 txindex=1
 EOF
-    chown $blockchain:$blockchain /data/$blockchain/$conf
+    chown $blockchain:$blockchain /data/$blockchain/$conf_file
 
     # Create service for the blockchain node with dedicated user/group
     cat << EOF > /etc/systemd/system/${daemon}d.service
@@ -74,7 +82,7 @@ After=network.target
 [Service]
 User=$blockchain
 Group=$blockchain
-ExecStart=/usr/bin/${daemon}d -daemon -conf=/data/$blockchain/$conf -datadir=/data/$blockchain
+ExecStart=/usr/bin/${daemon}d -daemon -conf=/data/$blockchain/$conf_file -datadir=/data/$blockchain
 Restart=always
 
 [Install]
@@ -88,5 +96,5 @@ EOF
     echo "$blockchain node setup completed. Check status with 'systemctl status ${daemon}d'"
 }
 
-# Setup Bitcoin node
-setup_node "bitcoin" "bitcoind" "bitcoin.conf" "ppa:bitcoin/bitcoin" 1000 # 1TB for growth
+# Example for Bitcoin with updated source URL
+setup_node "bitcoin" "https://bitcoincore.org/bin/bitcoin-core-28.1/bitcoin-28.1.tar.gz" "bitcoin-28.1.tar.gz" "--prefix=/usr --disable-bench --disable-gui --with-incompatible-bdb" "bitcoind" "bitcoin.conf" 1000
