@@ -48,8 +48,10 @@ else
   # Set environment variable for ord to use the new data directory
   echo "Setting ORD_DATA_DIR environment variable..."
   echo 'ORD_DATA_DIR="'$DATA_DIR'"' >> /etc/environment
-  source /etc/environment
 fi
+
+# Export ORD_DATA_DIR for the current shell session
+export ORD_DATA_DIR="$DATA_DIR"
 
 # Verify installation
 echo "Verifying ord installation..."
