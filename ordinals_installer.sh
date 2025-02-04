@@ -7,17 +7,11 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-# Install ord using the official script
+# Install ord using the official script with sudo
 echo "Installing ord..."
-curl --proto '=https' --tlsv1.2 -fsLS https://ordinals.com/install.sh | bash -s
+curl --proto '=https' --tlsv1.2 -fsLS https://ordinals.com/install.sh | sudo bash -s
 
-# Move ord to /usr/local/bin if not already there for system-wide access
-if ! command -v ord &> /dev/null; then
-  echo "Moving ord to /usr/local/bin..."
-  mv /root/.cargo/bin/ord /usr/local/bin/ord
-fi
-
-# Ensure ord is executable
+# Ensure ord is executable (though it should be by default)
 chmod 755 /usr/local/bin/ord
 
 # Create and set permissions for data directory on SSD
