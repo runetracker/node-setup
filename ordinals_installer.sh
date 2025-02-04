@@ -27,8 +27,26 @@ mkdir -p "$DATA_DIR"
 chown -R bitcoin:bitcoin "$DATA_DIR"
 chmod -R 750 "$DATA_DIR"
 
+# Write configuration file
+echo "Configuring ord with ord.yaml..."
+cat << EOF > "$DATA_DIR/ord.yaml"
+# Configuration for ord
+bitcoin_data_dir: /data/bitcoin
+cookie_file: /data/bitcoin/.cookie
+data_dir: $DATA_DIR
+index: $DATA_DIR/index.redb
+index_addresses: true
+index_runes: true
+index_sats: true
+index_transactions: true
+EOF
+
 # Verify installation
 echo "Verifying ord installation..."
 ord --version
+
+# Show current configuration settings
+echo "Current ord settings:"
+ord settings
 
 echo "Ord installation and configuration completed."
