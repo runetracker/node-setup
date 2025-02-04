@@ -7,9 +7,9 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-# Install ord using the official script with sudo
-echo "Installing ord..."
-curl --proto '=https' --tlsv1.2 -fsLS https://ordinals.com/install.sh | sudo bash -s
+# Install ord using the official script with sudo, specifying the installation location
+echo "Installing ord to /usr/local/bin..."
+curl --proto '=https' --tlsv1.2 -fsLS https://ordinals.com/install.sh | sudo bash -s -- --to /usr/local/bin
 
 # Ensure ord is executable (though it should be by default)
 chmod 755 /usr/local/bin/ord
