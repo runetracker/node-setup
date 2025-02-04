@@ -7,6 +7,12 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# Check if ord already exists in /usr/local/bin and remove it if it does
+if [ -f /usr/local/bin/ord ]; then
+  echo "Existing ord binary found in /usr/local/bin. Removing it..."
+  rm /usr/local/bin/ord
+fi
+
 # Install ord using the official script with sudo, specifying the installation location
 echo "Installing ord to /usr/local/bin..."
 curl --proto '=https' --tlsv1.2 -fsLS https://ordinals.com/install.sh | sudo bash -s -- --to /usr/local/bin
@@ -35,11 +41,15 @@ index_sats: true
 index_transactions: true
 EOF
 
-# Set environment variable for ord to use the new data directory
-# This will make ord will look for ord.yaml in this directory by default
-echo "Setting ORD_DATA_DIR environment variable..."
-echo 'ORD_DATA_DIR="'$DATA_DIR'"' >> /etc/environment
-source /etc/environment
+# Check if ORD_DATA_DIR exists in /etc/environment
+if grep -q "^ORD_DATA_DIR=" /etc/environment; then
+  echo "ORD_DATA_DIR is already set in /etc/environment."
+else
+  # Set environment variable for ord to use the new data directory
+  echo "Setting ORD_DATA_DIR environment variable..."
+  echo 'ORD_DATA_DIR="'$DATA_DIR'"' >> /etc/environment
+  source /etc/environment
+fi
 
 # Verify installation
 echo "Verifying ord installation..."
