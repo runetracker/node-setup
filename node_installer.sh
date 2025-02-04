@@ -66,8 +66,6 @@ setup_node() {
     # Create configuration file
     cat << EOF > /data/$blockchain/$conf_file
 datadir=/data/$blockchain
-rpcuser=${blockchain}rpc
-rpcpassword=$(openssl rand -base64 32)
 server=1
 txindex=1
 EOF
