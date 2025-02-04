@@ -35,6 +35,12 @@ index_sats: true
 index_transactions: true
 EOF
 
+# Set environment variable for ord to use the new data directory
+# This will make ord will look for ord.yaml in this directory by default
+echo "Setting ORD_DATA_DIR environment variable..."
+echo 'ORD_DATA_DIR="'$DATA_DIR'"' >> /etc/environment
+source /etc/environment
+
 # Verify installation
 echo "Verifying ord installation..."
 ord --version
