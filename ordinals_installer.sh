@@ -25,7 +25,9 @@ echo "Setting up ord data directory on SSD..."
 DATA_DIR="/data/ord"
 mkdir -p "$DATA_DIR"
 chown -R bitcoin:bitcoin "$DATA_DIR"
-chmod -R 750 "$DATA_DIR"
+
+# Set permissions to allow group write access
+chmod 755 /usr/local/bin/ord
 
 # Write configuration file
 echo "Configuring ord with ord.yaml..."
