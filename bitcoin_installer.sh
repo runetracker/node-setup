@@ -139,4 +139,4 @@ EOF
     cleanup_temp_files "$tarball" "$extracted_dir"
 }
 
-setup_node "bitcoin" "https://bitcoincore.org/bin/bitcoin-core-28.1/bitcoin-28.1.tar.gz" "bitcoin-28.1.tar.gz" 1000
+setup_node "bitcoin" "https://bitcoincore.org/bin/bitcoin-core-28.1/bitcoin-28.1.tar.gz" 1000
