@@ -82,6 +82,7 @@ setup_node() {
         cd "$extracted_dir"
     else
         echo "Error: Could not find extracted directory for $blockchain."
+        cleanup_temp_files "$tarball" "/tmp/${blockchain}-*"  # Cleanup even if the exact dir isn't found
         exit 1
     fi
 
