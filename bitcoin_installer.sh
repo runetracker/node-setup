@@ -89,8 +89,20 @@ setup_node() {
     # Configure and build the software
     if [ -f autogen.sh ]; then
         ./autogen.sh
+    else
+        echo "Error: autogen script not found in $(pwd)"
+        cleanup_temp_files "$tarball" "$extracted_dir"
+        exit 1
     fi
-    ./configure $configure_options
+
+    if [ -f configure ]; then
+        ./configure $configure_options
+    else
+        echo "Error: configure script not found in $(pwd)"
+        cleanup_temp_files "$tarball" "$extracted_dir"
+        exit 1
+    fi
+
     make -j$(nproc)
     make check
     make install
