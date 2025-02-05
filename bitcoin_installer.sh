@@ -128,5 +128,4 @@ EOF
     cleanup_temp_files "$tarball" "$extracted_dir"
 }
 
-# Example for Bitcoin with updated source URL
 setup_node "bitcoin" "https://bitcoincore.org/bin/bitcoin-core-28.1/bitcoin-28.1.tar.gz" "bitcoin-28.1.tar.gz" "--prefix=/usr --disable-bench --disable-gui --with-incompatible-bdb" "bitcoind" "bitcoin.conf" 1000
