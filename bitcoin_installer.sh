@@ -42,12 +42,13 @@ cleanup_temp_files() {
 setup_node() {
     local blockchain=$1
     local url=$2
-    local configure_options=$3
-    local min_space=$4
+    local min_space=$3
     local tarball
     local extracted_dir
     local conf_file="${blockchain}.conf"
     local daemon="${blockchain}d"
+    # Default configuration options for building
+    local configure_options="--prefix=/usr --disable-bench --disable-gui --with-incompatible-bdb"
 
     # Extract tarball name from URL
     tarball=$(basename "$url")
@@ -138,4 +139,4 @@ EOF
     cleanup_temp_files "$tarball" "$extracted_dir"
 }
 
-setup_node "bitcoin" "https://bitcoincore.org/bin/bitcoin-core-28.1/bitcoin-28.1.tar.gz" "bitcoin-28.1.tar.gz" "--prefix=/usr --disable-bench --disable-gui --with-incompatible-bdb" 1000
+setup_node "bitcoin" "https://bitcoincore.org/bin/bitcoin-core-28.1/bitcoin-28.1.tar.gz" "bitcoin-28.1.tar.gz" 1000
