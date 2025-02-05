@@ -24,6 +24,20 @@ check_disk_space() {
     fi
 }
 
+# Function to clean up temporary files
+cleanup_temp_files() {
+    local tarball=$1
+    local extracted_dir=$2
+
+    cd /tmp
+    if [ -f "$tarball" ]; then
+        rm "$tarball"
+    fi
+    if [ -d "$extracted_dir" ]; then
+        rm -rf "$extracted_dir"
+    fi
+}
+
 # Function to setup a blockchain node with dedicated user/group
 setup_node() {
     local blockchain=$1
@@ -33,6 +47,7 @@ setup_node() {
     local daemon=$5
     local conf_file=$6
     local min_space=$7
+    local extracted_dir
 
     # Check disk space for this blockchain
     check_disk_space $min_space
@@ -52,7 +67,8 @@ setup_node() {
     cd /tmp
     wget $url
     tar -xzvf $tarball
-    cd $(basename $tarball .tar.gz)
+    extracted_dir=$(pwd)/$(basename $tarball .tar.gz)
+    cd $extracted_dir
 
     # Configure and build the software
     if [ -f autogen.sh ]; then
@@ -103,6 +119,9 @@ EOF
     systemctl start ${daemon}
 
     echo "$blockchain node setup completed. Check status with 'systemctl status ${daemon}'"
+    
+    # Cleanup
+    cleanup_temp_files "$tarball" "$extracted_dir"
 }
 
 # Example for Bitcoin with updated source URL
