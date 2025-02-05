@@ -142,6 +142,11 @@ EOF
     # Reload systemd daemon
     systemctl daemon-reload
 
+    # Create an empty .cookie file with proper permissions
+    touch /data/$blockchain/.cookie
+    chmod 644 /data/$blockchain/.cookie
+    chown $blockchain:$blockchain /data/$blockchain/.cookie
+
     # Enable and start the service
     systemctl enable ${daemon}
     systemctl start ${daemon}
