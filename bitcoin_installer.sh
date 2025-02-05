@@ -53,7 +53,11 @@ setup_node() {
     check_disk_space $min_space
 
     # Create blockchain specific user and group
-    adduser --system --group --home /data/$blockchain $blockchain
+    if ! getent passwd "$blockchain" > /dev/null 2>&1; then
+        adduser --system --group --home /data/$blockchain $blockchain
+    else
+        echo "User '$blockchain' already exists. Skipping user creation." 
+    fi
 
     # Create blockchain specific directory with correct permissions
     mkdir -p /data/$blockchain
