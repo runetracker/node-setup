@@ -42,12 +42,15 @@ cleanup_temp_files() {
 setup_node() {
     local blockchain=$1
     local url=$2
-    local tarball=$3
-    local configure_options=$4
-    local daemon=$5
-    local conf_file=$6
-    local min_space=$7
+    local configure_options=$3
+    local daemon=$4
+    local conf_file=$5
+    local min_space=$6
+    local tarball
     local extracted_dir
+
+    # Extract tarball name from URL
+    tarball=$(basename "$url")
 
     # Check disk space for this blockchain
     check_disk_space $min_space
@@ -56,7 +59,7 @@ setup_node() {
     if ! getent passwd "$blockchain" > /dev/null 2>&1; then
         adduser --system --group --home /data/$blockchain $blockchain
     else
-        echo "User '$blockchain' already exists. Skipping user creation." 
+        echo "User '$blockchain' already exists. Skipping user creation."
     fi
 
     # Create blockchain specific directory with correct permissions
@@ -70,9 +73,16 @@ setup_node() {
     # Fetch source code
     cd /tmp
     wget $url
-    tar -xzvf $tarball
-    extracted_dir=$(pwd)/$(basename $tarball .tar.gz)
-    cd $extracted_dir
+    tar -xzvf "$tarball"
+    # Assuming the folder name starts with blockchain name, followed by a dash and version
+    extracted_dir=$(ls -d /tmp/${blockchain}-* | head -n 1)
+
+    if [ -d "$extracted_dir" ]; then
+        cd "$extracted_dir"
+    else
+        echo "Error: Could not find extracted directory for $blockchain."
+        exit 1
+    fi
 
     # Configure and build the software
     if [ -f autogen.sh ]; then
@@ -127,5 +137,6 @@ EOF
     # Cleanup
     cleanup_temp_files "$tarball" "$extracted_dir"
 }
+
 
 setup_node "bitcoin" "https://bitcoincore.org/bin/bitcoin-core-28.1/bitcoin-28.1.tar.gz" "bitcoin-28.1.tar.gz" "--prefix=/usr --disable-bench --disable-gui --with-incompatible-bdb" "bitcoind" "bitcoin.conf" 1000
