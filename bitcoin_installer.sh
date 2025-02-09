@@ -144,7 +144,7 @@ EOF
 
     # Create an empty .cookie file with proper permissions
     touch /data/$blockchain/.cookie
-    chmod 644 /data/$blockchain/.cookie
+    chmod 660 /data/$blockchain/.cookie
     chown $blockchain:$blockchain /data/$blockchain/.cookie
 
     # Enable and start the service
