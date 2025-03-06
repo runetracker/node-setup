@@ -38,6 +38,30 @@ cleanup_temp_files() {
     fi
 }
 
+# Function to prompt for RPC credentials
+prompt_rpc_credentials() {
+    local blockchain=$1
+    local rpcuser
+    local rpcpassword
+
+    echo "Setting up RPC credentials for $blockchain node..."
+    read -p "Enter RPC username: " rpcuser
+    while [ -z "$rpcuser" ]; do
+        echo "Username cannot be empty."
+        read -p "Enter RPC username: " rpcuser
+    done
+    read -s -p "Enter RPC password: " rpcpassword
+    echo  # Newline after password input
+    while [ -z "$rpcpassword" ]; do
+        echo "Password cannot be empty."
+        read -s -p "Enter RPC password: " rpcpassword
+        echo
+    done
+
+    # Export variables to be accessible outside the function
+    echo "$rpcuser" "$rpcpassword"
+}
+
 # Function to setup a blockchain node with dedicated user/group
 setup_node() {
     local blockchain=$1
@@ -57,20 +81,8 @@ setup_node() {
     # Check disk space for this blockchain
     check_disk_space $min_space
 
-    # Prompt for RPC credentials
-    echo "Setting up RPC credentials for $blockchain node..."
-    read -p "Enter RPC username: " rpcuser
-    while [ -z "$rpcuser" ]; do
-        echo "Username cannot be empty."
-        read -p "Enter RPC username: " rpcuser
-    done
-    read -s -p "Enter RPC password: " rpcpassword
-    echo  # Newline after password input
-    while [ -z "$rpcpassword" ]; do
-        echo "Password cannot be empty."
-        read -s -p "Enter RPC password: " rpcpassword
-        echo
-    done
+    # Get RPC credentials
+    read rpcuser rpcpassword <<< $(prompt_rpc_credentials "$blockchain")
 
     # Create blockchain specific user and group
     if ! getent passwd "$blockchain" > /dev/null 2>&1; then
