@@ -47,6 +47,7 @@ setup_node() {
     local extracted_dir
     local conf_file="${blockchain}.conf"
     local daemon="${blockchain}d"
+    local cli="${blockchain}-cli"
     # Default configuration options for building
     local configure_options="--prefix=/usr --disable-bench --disable-gui --with-incompatible-bdb"
 
@@ -55,6 +56,21 @@ setup_node() {
 
     # Check disk space for this blockchain
     check_disk_space $min_space
+
+    # Prompt for RPC credentials
+    echo "Setting up RPC credentials for $blockchain node..."
+    read -p "Enter RPC username: " rpcuser
+    while [ -z "$rpcuser" ]; do
+        echo "Username cannot be empty."
+        read -p "Enter RPC username: " rpcuser
+    done
+    read -s -p "Enter RPC password: " rpcpassword
+    echo  # Newline after password input
+    while [ -z "$rpcpassword" ]; do
+        echo "Password cannot be empty."
+        read -s -p "Enter RPC password: " rpcpassword
+        echo
+    done
 
     # Create blockchain specific user and group
     if ! getent passwd "$blockchain" > /dev/null 2>&1; then
@@ -107,13 +123,13 @@ setup_node() {
     make check
     make install
 
-    # Create configuration file
+    # Create configuration file with user-provided rpcuser and rpcpassword
     cat << EOF > /data/$blockchain/$conf_file
 datadir=/data/$blockchain
 server=1
 txindex=1
-rpcuser=myuser
-rpcpassword=mypassword
+rpcuser=$rpcuser
+rpcpassword=$rpcpassword
 EOF
     chown $blockchain:$blockchain /data/$blockchain/$conf_file
     chmod 600 /data/$blockchain/$conf_file  # Restrict to owner only for security
@@ -145,11 +161,19 @@ EOF
     # Reload systemd daemon
     systemctl daemon-reload
 
+    # Set up system-wide alias using $blockchain variable
+    cat << EOF > /etc/profile.d/${blockchain}.sh
+alias ${cli}="${cli} -datadir=/data/$blockchain -rpcuser=$rpcuser -rpcpassword=$rpcpassword"
+EOF
+    chmod +x /etc/profile.d/${blockchain}.sh
+    source /etc/profile  # Apply to current session
+
     # Enable and start the service
     systemctl enable ${daemon}
     systemctl start ${daemon}
 
     echo "$blockchain node setup completed. Check status with 'systemctl status ${daemon}'"
+    echo "You can now use '${cli} getblockcount' system-wide after the node finishes verifying blocks."
     
     # Cleanup
     cleanup_temp_files "$tarball" "$extracted_dir"
