@@ -112,8 +112,11 @@ setup_node() {
 datadir=/data/$blockchain
 server=1
 txindex=1
+rpcuser=myuser
+rpcpassword=mypassword
 EOF
     chown $blockchain:$blockchain /data/$blockchain/$conf_file
+    chmod 600 /data/$blockchain/$conf_file  # Restrict to owner only for security
 
     # Create service for the blockchain node with dedicated user/group
     cat << EOF > /etc/systemd/system/${daemon}.service
@@ -141,11 +144,6 @@ EOF
 
     # Reload systemd daemon
     systemctl daemon-reload
-
-    # Create an empty .cookie file with proper permissions
-    touch /data/$blockchain/.cookie
-    chmod 660 /data/$blockchain/.cookie
-    chown $blockchain:$blockchain /data/$blockchain/.cookie
 
     # Enable and start the service
     systemctl enable ${daemon}
