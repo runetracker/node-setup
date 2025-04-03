@@ -10,7 +10,7 @@ fi
 # Check if ord.service is active
 SERVICE_NAME="ord.service"
 if systemctl is-active --quiet "$SERVICE_NAME"; then
-  echo "$SERVICE_NAME is currently active. Please stop it first with 'systemctl stop $SERVICE_NAME' before updating."
+  echo "$SERVICE_NAME is currently active. Please stop it first with 'sudo systemctl stop $SERVICE_NAME' before updating."
   exit 1
 fi
 
